@@ -1,43 +1,54 @@
-# Atividade de Aprofundamento em Scripts SQL
+Atividade de Aprofundamento em Scripts SQL
+Banco de Dados Utilizado: Sakila (MySQL)
 
-**Banco de Dados Utilizado:** Sakila (MySQL)  
-**Formato:** Conceito + 2 desafios (gerados por IA) + Soluções em SQL
+1. Tipos de JOIN
+Conceito: JOINs são usados para combinar linhas de duas ou mais tabelas com base em uma coluna relacionada entre elas.
 
----
+INNER JOIN: Retorna apenas os registros que têm valores correspondentes em ambas as tabelas (interseção).
 
-## Item 1: Tipos de JOIN
+LEFT JOIN: Retorna todos os registros da tabela da esquerda e os registros correspondentes da tabela da direita. Se não houver correspondência, o resultado é NULL no lado direito.
 
-**Conceito:** `JOIN`s são para conectar tabelas. Simples assim.
+RIGHT JOIN: Retorna todos os registros da tabela da direita e os registros correspondentes da tabela da esquerda. Se não houver correspondência, o resultado é NULL no lado esquerdo.
 
-- **INNER JOIN:** Só pega o que tem nos dois lados. Tipo a interseção.
-- **LEFT JOIN:** Pega tudo da tabela da esquerda e, se achar, a correspondência da direita. Se não achar, vem `NULL`.
-- **RIGHT JOIN:** O contrário do LEFT. Pega tudo da direita e, se achar, a correspondência da esquerda. Se não, `NULL`.
+Desafio 1
+Listar os nomes dos clientes e os títulos dos filmes que eles alugaram.
 
-**Desafio 1 (INNER JOIN):** Nomes de clientes e os títulos dos filmes que eles alugaram.
-
-```sql
-SELECT c.first_name, c.last_name, f.title
+Solução 1
+SELECT
+    c.first_name,
+    c.last_name,
+    f.title
 FROM customer c
 INNER JOIN rental r ON c.customer_id = r.customer_id
 INNER JOIN inventory i ON r.inventory_id = i.inventory_id
 INNER JOIN film f ON i.film_id = f.film_id;
-Desafio 2 (LEFT JOIN): Todos os clientes, mesmo quem nunca alugou filme. Pra quem alugou, mostra o título.
 
-SQL
+Desafio 2
+Mostrar todos os clientes, mesmo aqueles que nunca alugaram um filme. Para os que alugaram, mostrar o título do filme.
 
-SELECT c.first_name, c.last_name, f.title
+Solução 2
+SELECT
+    c.first_name,
+    c.last_name,
+    f.title
 FROM customer c
 LEFT JOIN rental r ON c.customer_id = r.customer_id
 LEFT JOIN inventory i ON r.inventory_id = i.inventory_id
 LEFT JOIN film f ON i.film_id = f.film_id;
-Item 2: Múltiplos JOINs
-Conceito: Quando a info tá espalhada, a gente vai JOINando uma tabela na outra. É tipo uma corrente: um JOIN junta duas, e o resultado já serve pro próximo JOIN.
 
-Desafio 1: Relatório com nome do cliente, cidade, país e os filmes alugados.
+2. Múltiplos JOINs
+Conceito: Para obter dados que estão espalhados por várias tabelas, você pode encadear múltiplos JOINs. Cada JOIN conecta uma nova tabela ao resultado do JOIN anterior.
 
-SQL
+Desafio 1
+Criar um relatório com o nome do cliente, cidade, país e os títulos dos filmes que eles alugaram.
 
-SELECT c.first_name, c.last_name, ci.city, co.country, f.title
+Solução 1
+SELECT
+    c.first_name,
+    c.last_name,
+    ci.city,
+    co.country,
+    f.title
 FROM customer c
 JOIN address a ON c.address_id = a.address_id
 JOIN city ci ON a.city_id = ci.city_id
@@ -45,59 +56,78 @@ JOIN country co ON ci.country_id = co.country_id
 JOIN rental r ON c.customer_id = r.customer_id
 JOIN inventory i ON r.inventory_id = i.inventory_id
 JOIN film f ON i.film_id = f.film_id;
-Desafio 2: Atores, filmes que fizeram e categorias desses filmes.
 
-SQL
+Desafio 2
+Listar os atores, os filmes em que atuaram e as categorias desses filmes.
 
-SELECT a.first_name, a.last_name, f.title, c.name AS category
+Solução 2
+SELECT
+    a.first_name,
+    a.last_name,
+    f.title,
+    c.name AS category
 FROM actor a
 JOIN film_actor fa ON a.actor_id = fa.actor_id
 JOIN film f ON fa.film_id = f.film_id
 JOIN film_category fc ON f.film_id = fc.film_id
 JOIN category c ON fc.category_id = c.category_id;
-Item 3: Funções na Cláusula SELECT
-Conceito: Funções no SELECT servem pra arrumar, calcular ou mudar os dados na hora da consulta.
 
-Texto: CONCAT, UPPER, LOWER, LENGTH, REPLACE (pra juntar, maiúscula, minúscula, tamanho, substituir).
-Numéricas: ROUND, CEIL, FLOOR (pra arredondar).
-NULLs: COALESCE, IFNULL (pra trocar NULL por outra coisa).
-Desafio 1 (Strings): Nome completo dos clientes em maiúsculas e o tamanho desse nome.
+3. Funções na Cláusula SELECT
+Conceito: Funções no SELECT permitem manipular, formatar ou calcular dados diretamente na consulta.
 
-SQL
+Texto: CONCAT, UPPER, LOWER, LENGTH, REPLACE.
 
-SELECT UPPER(CONCAT(first_name, ' ', last_name)) AS full_name,
-       LENGTH(CONCAT(first_name, ' ', last_name)) AS name_length
+Numéricas: ROUND, CEIL, FLOOR.
+
+Tratamento de Nulos: COALESCE, IFNULL.
+
+Desafio 1
+Exibir o nome completo dos clientes em letras maiúsculas e o comprimento total do nome.
+
+Solução 1
+SELECT
+    UPPER(CONCAT(first_name, ' ', last_name)) AS full_name,
+    LENGTH(CONCAT(first_name, ' ', last_name)) AS name_length
 FROM customer;
-Desafio 2 (NULLs e arredondamento): Pagamentos arredondados e NULLs como zero.
 
-SQL
+Desafio 2
+Mostrar os valores de pagamento arredondados para duas casas decimais, tratando valores NULL como zero.
 
-SELECT payment_id,
-       ROUND(IFNULL(amount, 0), 2) AS rounded_amount
+Solução 2
+SELECT
+    payment_id,
+    ROUND(IFNULL(amount, 0), 2) AS rounded_amount
 FROM payment;
-Item 4: Funções de Data e Hora
-Conceito: Funções pra mexer com datas e horas: NOW(), DATEDIFF(), DATE_FORMAT(), YEAR(), etc.
 
-Desafio 1: Calcular os dias entre aluguel e devolução.
+4. Funções de Data e Hora
+Conceito: Funções específicas para manipular e extrair informações de tipos de dados de data e hora, como NOW(), DATEDIFF(), DATE_FORMAT(), YEAR().
 
-SQL
+Desafio 1
+Calcular o número de dias entre a data de aluguel e a data de devolução.
 
-SELECT rental_id, DATEDIFF(return_date, rental_date) AS rental_days
+Solução 1
+SELECT
+    rental_id,
+    DATEDIFF(return_date, rental_date) AS rental_days
 FROM rental
 WHERE return_date IS NOT NULL;
-Desafio 2: Data de pagamento formatada 'dd/mm/yyyy'.
 
-SQL
+Desafio 2
+Formatar a data de pagamento para o padrão dd/mm/yyyy.
 
-SELECT payment_id, DATE_FORMAT(payment_date, '%d/%m/%Y') AS formatted_date
+Solução 2
+SELECT
+    payment_id,
+    DATE_FORMAT(payment_date, '%d/%m/%Y') AS formatted_date
 FROM payment;
-Item 5: Subconsultas (Subqueries)
-Conceito: Uma consulta dentro da outra. Pode ser pra pegar um valor único (escalar), vários valores (IN), ou ser "correlacionada" (depende da consulta de fora).
 
-Desafio 1: Clientes que alugaram algum filme de 'Action'.
+5. Subconsultas (Subqueries)
+Conceito: Uma SELECT dentro de outra SELECT. Pode ser usada para retornar um único valor (escalar), uma lista de valores (para usar com IN), ou de forma correlacionada (dependendo da consulta externa).
 
-SQL
+Desafio 1
+Listar os clientes que alugaram pelo menos um filme da categoria 'Action'.
 
+Solução 1
 SELECT DISTINCT c.first_name, c.last_name
 FROM customer c
 WHERE c.customer_id IN (
@@ -109,22 +139,26 @@ WHERE c.customer_id IN (
     JOIN category cat ON fc.category_id = cat.category_id
     WHERE cat.name = 'Action'
 );
-Desafio 2 (correlacionada): Filmes e quantas vezes cada um foi alugado.
 
-SQL
+Desafio 2
+Para cada filme, contar quantas vezes ele foi alugado usando uma subconsulta correlacionada.
 
-SELECT title,
-       (SELECT COUNT(*) FROM inventory i
-        JOIN rental r ON i.inventory_id = r.inventory_id
-        WHERE i.film_id = f.film_id) AS rental_count
+Solução 2
+SELECT
+    title,
+    (SELECT COUNT(*)
+     FROM inventory i
+     JOIN rental r ON i.inventory_id = r.inventory_id
+     WHERE i.film_id = f.film_id) AS rental_count
 FROM film f;
-Item 6: Subconsultas em Comandos DML
-Conceito: Dá pra usar subconsultas em INSERT, UPDATE e DELETE pra definir quem ou o que vai ser afetado de um jeito dinâmico.
 
-Desafio 1 (UPDATE): Dar 10% de desconto em pagamentos de clientes que alugaram mais de 40 filmes.
+6. Subconsultas em Comandos DML
+Conceito: Usar subconsultas em comandos de manipulação de dados (INSERT, UPDATE, DELETE) para definir dinamicamente os registros que serão afetados.
 
-SQL
+Desafio 1
+Aplicar um desconto de 10% nos pagamentos de clientes que alugaram mais de 40 filmes.
 
+Solução 1
 UPDATE payment
 SET amount = amount * 0.9
 WHERE customer_id IN (
@@ -133,87 +167,101 @@ WHERE customer_id IN (
     GROUP BY customer_id
     HAVING COUNT(*) > 40
 );
-Desafio 2 (DELETE): Deletar pagamentos de clientes que nunca alugaram filme.
 
-SQL
+Desafio 2
+Deletar todos os pagamentos de clientes que nunca realizaram um aluguel.
 
+Solução 2
 DELETE FROM payment
 WHERE customer_id NOT IN (
     SELECT DISTINCT customer_id FROM rental
 );
-Item 7: WITH AS (CTE) e DISTINCT
+
+7. WITH AS (CTE) e DISTINCT
 Conceito:
 
-DISTINCT: Tira as linhas repetidas.
-CTE (WITH AS): Ajuda a organizar queries grandes, criando "blocos" nomeados e temporários que você usa depois.
-Desafio 1: Contar quantas cidades únicas tem no banco.
+DISTINCT: Remove linhas duplicadas do resultado de uma consulta.
 
-SQL
+CTE (Common Table Expression): Definida com WITH AS, permite criar um conjunto de resultados temporário e nomeado, que pode ser referenciado posteriormente na consulta principal. Ajuda a organizar queries complexas.
 
+Desafio 1
+Contar quantas cidades únicas existem no banco de dados.
+
+Solução 1
 SELECT COUNT(DISTINCT city) AS unique_cities FROM city;
-Desafio 2 (CTE): Listar os filmes mais alugados usando CTE.
 
-SQL
+Desafio 2
+Listar os filmes mais alugados em ordem decrescente, utilizando uma CTE.
 
+Solução 2
 WITH film_rentals AS (
-    SELECT i.film_id, COUNT(*) AS total_rentals
+    SELECT
+        i.film_id,
+        COUNT(*) AS total_rentals
     FROM rental r
     JOIN inventory i ON r.inventory_id = i.inventory_id
     GROUP BY i.film_id
 )
-SELECT f.title, fr.total_rentals
+SELECT
+    f.title,
+    fr.total_rentals
 FROM film_rentals fr
 JOIN film f ON f.film_id = fr.film_id
 ORDER BY fr.total_rentals DESC;
-Item 8: Funções de Janela (Window Functions) para Ranking
-Conceito: Funções de janela fazem cálculos em um "pedaço" de dados relacionados, sem agrupar tudo. O OVER() define esse pedaço. Ótimas pra ranking:
 
-ROW_NUMBER(): Numera sequencialmente.
-RANK(): Dá ranking, mas "pula" se tiver empate.
-DENSE_RANK(): Dá ranking, não pula se tiver empate.
-Desafio 1 (RANK): Clientes, gastos totais e ranking de gastos (pulando posições se tiver empate).
+8. Funções de Janela (Window Functions)
+Conceito: Realizam cálculos em um conjunto de linhas relacionadas (uma "janela"), sem agrupar o resultado em uma única linha. A cláusula OVER() define a janela. São ótimas para criar rankings.
 
-SQL
+ROW_NUMBER(): Numera as linhas sequencialmente.
 
+RANK(): Cria um ranking, mas "pula" posições em caso de empate.
+
+DENSE_RANK(): Cria um ranking, mas não pula posições em caso de empate.
+
+Desafio 1
+Criar um ranking de clientes com base no total gasto, pulando posições em caso de empate.
+
+Solução 1
 SELECT
     c.first_name,
     c.last_name,
     SUM(p.amount) AS total_spent,
     RANK() OVER (ORDER BY SUM(p.amount) DESC) AS ranking_gasto
-FROM
-    customer c
-JOIN
-    payment p ON c.customer_id = p.customer_id
-GROUP BY
-    c.customer_id, c.first_name, c.last_name
-ORDER BY
-    ranking_gasto, total_spent DESC;
-Desafio 2 (DENSE_RANK): Os 5 filmes mais longos de cada categoria, sem pular ranking em caso de empate na duração.
+FROM customer c
+JOIN payment p ON c.customer_id = p.customer_id
+GROUP BY c.customer_id, c.first_name, c.last_name
+ORDER BY ranking_gasto, total_spent DESC;
 
-SQL
+Desafio 2
+Listar os 5 filmes mais longos de cada categoria, sem pular posições no ranking em caso de empate na duração.
 
+Solução 2
+WITH RankedFilms AS (
+    SELECT
+        c.name AS category_name,
+        f.title,
+        f.length,
+        DENSE_RANK() OVER (PARTITION BY c.name ORDER BY f.length DESC) AS rank_duracao
+    FROM film f
+    JOIN film_category fc ON f.film_id = fc.film_id
+    JOIN category c ON fc.category_id = c.category_id
+)
 SELECT
-    c.name AS category_name,
-    f.title,
-    f.length,
-    DENSE_RANK() OVER (PARTITION BY c.name ORDER BY f.length DESC) AS rank_duracao
-FROM
-    film f
-JOIN
-    film_category fc ON f.film_id = fc.film_id
-JOIN
-    category c ON fc.category_id = c.category_id
-WHERE
-    DENSE_RANK() OVER (PARTITION BY c.name ORDER BY f.length DESC) <= 5
-ORDER BY
-    c.name, rank_duracao;
-Item 9: Lógica Condicional com CASE
-Conceito: CASE WHEN ... THEN ... ELSE ... END é tipo um "if/then/else" no SQL. Cria novas colunas com valores baseados em condições.
+    category_name,
+    title,
+    length,
+    rank_duracao
+FROM RankedFilms
+WHERE rank_duracao <= 5
+ORDER BY category_name, rank_duracao;
 
-Desafio 1: Classificar filmes por duração: 'Curto' (até 60 min), 'Médio' (61-120 min), 'Longo' (acima de 120 min).
+9. Lógica Condicional com CASE
+Conceito: A expressão CASE WHEN ... THEN ... ELSE ... END funciona como uma estrutura if/then/else dentro do SQL, permitindo criar colunas com valores baseados em condições.
 
-SQL
+Desafio 1
+Classificar filmes por duração: 'Curto' (até 60 min), 'Médio' (61-120 min) e 'Longo' (acima de 120 min).
 
+Solução 1
 SELECT
     title,
     length,
@@ -222,14 +270,13 @@ SELECT
         WHEN length > 60 AND length <= 120 THEN 'Médio'
         ELSE 'Longo'
     END AS classificacao_duracao
-FROM
-    film
-ORDER BY
-    length;
-Desafio 2: Nível de atividade do cliente por filmes alugados: 'Baixo' (até 10), 'Médio' (11-30), 'Alto' (mais de 30).
+FROM film
+ORDER BY length;
 
-SQL
+Desafio 2
+Classificar o nível de atividade do cliente com base no número de filmes alugados: 'Baixo' (até 10), 'Médio' (11-30) e 'Alto' (mais de 30).
 
+Solução 2
 SELECT
     c.first_name,
     c.last_name,
@@ -239,135 +286,116 @@ SELECT
         WHEN COUNT(r.rental_id) > 10 AND COUNT(r.rental_id) <= 30 THEN 'Médio'
         ELSE 'Alto'
     END AS nivel_atividade
-FROM
-    customer c
-LEFT JOIN
-    rental r ON c.customer_id = r.customer_id
-GROUP BY
-    c.customer_id, c.first_name, c.last_name
-ORDER BY
-    total_filmes_alugados DESC;
-Item 10: Combinando Resultados com UNION
-Conceito: UNION e UNION ALL juntam resultados de várias consultas SELECT.
+FROM customer c
+LEFT JOIN rental r ON c.customer_id = r.customer_id
+GROUP BY c.customer_id, c.first_name, c.last_name
+ORDER BY total_filmes_alugados DESC;
 
-UNION: Tira duplicatas. Mais lento.
-UNION ALL: Mantém duplicatas. Mais rápido. As consultas precisam ter o mesmo número e tipo de colunas.
-Desafio 1: Uma lista única com nomes completos de atores e clientes.
+10. Combinando Resultados com UNION
+Conceito: UNION e UNION ALL combinam o resultado de duas ou mais consultas SELECT em um único conjunto de resultados.
 
-SQL
+UNION: Remove linhas duplicadas (mais lento).
 
-SELECT
-    first_name,
-    last_name
-FROM
-    actor
+UNION ALL: Mantém todas as linhas, incluindo duplicatas (mais rápido).
+
+As consultas devem ter o mesmo número e tipos de colunas compatíveis.
+
+Desafio 1
+Criar uma lista única com os nomes completos de atores e clientes.
+
+Solução 1
+SELECT first_name, last_name FROM actor
 UNION
-SELECT
-    first_name,
-    last_name
-FROM
-    customer
-ORDER BY
-    first_name, last_name;
-Desafio 2: Filmes lançados em 2006 OU com mais de 180 min. (Pode incluir duplicatas se um filme se encaixar nas duas).
+SELECT first_name, last_name FROM customer
+ORDER BY first_name, last_name;
 
-SQL
+Desafio 2
+Listar todos os filmes lançados em 2006 OU com duração superior a 180 minutos, permitindo duplicatas.
 
-SELECT title, release_year, length
-FROM film
+Solução 2
+SELECT title, release_year, length FROM film
 WHERE release_year = 2006
 UNION ALL
-SELECT title, release_year, length
-FROM film
+SELECT title, release_year, length FROM film
 WHERE length > 180
 ORDER BY title;
-Item 11: Visões (Views)
-Conceito: Views são "tabelas virtuais" baseadas em uma SELECT. Não guardam dados, mas a query. Servem pra:
 
-Simplificar consultas chatas.
-Reaproveitar código.
-Controlar acesso (segurança).
-Desafio 1: Criar uma VIEW filmes_mais_alugados com título e total de aluguéis (do mais para o menos).
+11. Visões (Views)
+Conceito: Views são "tabelas virtuais" baseadas no resultado de uma consulta SELECT. Elas não armazenam dados fisicamente, mas simplificam consultas complexas, promovem a reutilização de código e podem ser usadas para controle de acesso.
 
-SQL
+Desafio 1
+Criar uma VIEW chamada filmes_mais_alugados que contenha o título do filme e o total de aluguéis.
 
-CREATE VIEW filmes_mais_alugados AS
+Solução 1
+CREATE OR REPLACE VIEW filmes_mais_alugados AS
 SELECT
     f.title,
     COUNT(r.rental_id) AS total_alugueis
-FROM
-    film f
-JOIN
-    inventory i ON f.film_id = i.film_id
-JOIN
-    rental r ON i.inventory_id = r.inventory_id
-GROUP BY
-    f.title
-ORDER BY
-    total_alugueis DESC;
-Desafio 2: Usar a VIEW filmes_mais_alugados pra listar os 5 mais alugados.
+FROM film f
+JOIN inventory i ON f.film_id = i.film_id
+JOIN rental r ON i.inventory_id = r.inventory_id
+GROUP BY f.title
+ORDER BY total_alugueis DESC;
 
-SQL
+Desafio 2
+Usar a VIEW criada para listar os 5 filmes mais alugados.
 
+Solução 2
 SELECT
     title,
     total_alugueis
-FROM
-    filmes_mais_alugados
+FROM filmes_mais_alugados
 LIMIT 5;
-Item 12: Filtragem com WHERE vs. HAVING
-Conceito: Ambos filtram, mas em momentos diferentes:
 
-WHERE: Filtra linhas individuais antes de agrupar (GROUP BY). Pensa nele como o "primeiro corte".
-HAVING: Filtra grupos de linhas depois que o GROUP BY e as agregações (COUNT, SUM) já rolaram. Ele filtra o "resumo".
-Desafio 1: Categorias de filmes com média de duração acima de 120 minutos.
+12. Filtragem com WHERE vs. HAVING
+Conceito: Ambos filtram dados, mas em momentos diferentes do processamento da consulta.
 
-SQL
+WHERE: Filtra as linhas antes de qualquer agrupamento (GROUP BY). Atua sobre os dados brutos.
 
+HAVING: Filtra os grupos de linhas depois do agrupamento e da aplicação de funções de agregação (COUNT, SUM, AVG, etc.). Atua sobre os dados já resumidos.
+
+Desafio 1
+Listar as categorias de filmes cuja média de duração é superior a 120 minutos.
+
+Solução 1
 SELECT
     c.name AS category_name,
     AVG(f.length) AS average_length
-FROM
-    category c
-JOIN
-    film_category fc ON c.category_id = fc.category_id
-JOIN
-    film f ON fc.film_id = f.film_id
-GROUP BY
-    c.name
-HAVING
-    AVG(f.length) > 120
-ORDER BY
-    average_length DESC;
-Desafio 2: Clientes que fizeram mais de 30 pagamentos E gastaram mais de 150.
+FROM category c
+JOIN film_category fc ON c.category_id = fc.category_id
+JOIN film f ON fc.film_id = f.film_id
+GROUP BY c.name
+HAVING AVG(f.length) > 120
+ORDER BY average_length DESC;
 
-SQL
+Desafio 2
+Encontrar clientes que fizeram mais de 30 pagamentos E cujo total gasto foi superior a $150.
 
+Solução 2
 SELECT
     c.first_name,
     c.last_name,
     COUNT(p.payment_id) AS total_pagamentos,
     SUM(p.amount) AS total_gasto
-FROM
-    customer c
-JOIN
-    payment p ON c.customer_id = p.customer_id
-GROUP BY
-    c.customer_id, c.first_name, c.last_name
-HAVING
-    COUNT(p.payment_id) > 30 AND SUM(p.amount) > 150
-ORDER BY
-    total_gasto DESC;
-Item 13: Controle de Transações (COMMIT e ROLLBACK)
-Conceito: Transação é um monte de operações SQL que funcionam como um pacote só. Ou tudo dá certo e salva (COMMIT), ou se der erro, tudo desfaz (ROLLBACK) e o banco volta ao que era. Essencial pra não bagunçar os dados.
+FROM customer c
+JOIN payment p ON c.customer_id = p.customer_id
+GROUP BY c.customer_id, c.first_name, c.last_name
+HAVING COUNT(p.payment_id) > 30 AND SUM(p.amount) > 150
+ORDER BY total_gasto DESC;
 
-START TRANSACTION/BEGIN: Começa o pacote.
-COMMIT: Salva tudo de vez.
-ROLLBACK: Desfaz tudo que foi feito desde o START TRANSACTION.
-Desafio 1: Simular um aluguel: inserir na tabela rental e atualizar last_update do inventory. Tudo num bloco transacional.
+13. Controle de Transações (COMMIT e ROLLBACK)
+Conceito: Uma transação é um conjunto de operações SQL que devem ser executadas como uma unidade atômica. Ou todas são bem-sucedidas e salvas permanentemente (COMMIT), ou todas falham e são desfeitas (ROLLBACK), garantindo a integridade dos dados.
 
-SQL
+START TRANSACTION ou BEGIN: Inicia o bloco da transação.
 
+COMMIT: Confirma e salva todas as alterações.
+
+ROLLBACK: Desfaz todas as alterações desde o início da transação.
+
+Desafio 1
+Simular um aluguel de filme (inserir em rental e atualizar inventory) dentro de uma transação.
+
+Solução 1
 -- Cenário de Sucesso (COMMIT)
 START TRANSACTION;
 
@@ -382,19 +410,20 @@ WHERE inventory_id = 1;
 
 COMMIT;
 
--- Cenário de Falha (ROLLBACK) - Exemplo
+-- Cenário de Falha (ROLLBACK) - Exemplo conceitual
 -- START TRANSACTION;
 -- INSERT INTO rental (rental_date, inventory_id, customer_id, staff_id, return_date, last_update)
--- VALUES (NOW(), 99999, 1, 1, NULL, NOW()); -- inventory_id inválido
--- ROLLBACK; -- Desfaz a inserção
-Desafio 2: Simular exclusão de cliente, pagamentos e aluguéis. Tudo numa transação pra garantir que ou apaga tudo ou nada.
+-- VALUES (NOW(), 99999, 1, 1, NULL, NOW()); -- inventory_id inválido causaria erro
+-- ROLLBACK; -- A inserção seria desfeita
 
-SQL
+Desafio 2
+Simular a exclusão de um cliente e todos os seus registros relacionados (payments e rentals) usando uma transação.
 
+Solução 2
 -- Cenário de Sucesso (COMMIT)
 START TRANSACTION;
 
-SET @customer_to_delete = 100; -- Cliente para apagar
+SET @customer_to_delete = 100; -- ID do cliente a ser apagado
 
 DELETE FROM payment WHERE customer_id = @customer_to_delete;
 DELETE FROM rental WHERE customer_id = @customer_to_delete;
@@ -402,26 +431,22 @@ DELETE FROM customer WHERE customer_id = @customer_to_delete;
 
 COMMIT;
 
--- Cenário de Falha (ROLLBACK) - Exemplo
--- START TRANSACTION;
--- SET @customer_to_delete_fail = 99999;
--- DELETE FROM payment WHERE customer_id = @customer_to_delete_fail;
--- ROLLBACK;
-Item 14: Gatilhos (Triggers)
-Conceito: Um Trigger é um código SQL que roda automaticamente quando algo acontece em uma tabela (INSERT, UPDATE ou DELETE). Bom pra auditoria, validação complexa ou pra manter dados sincronizados.
+14. Gatilhos (Triggers)
+Conceito: Um Trigger é um procedimento armazenado que é executado automaticamente em resposta a um evento INSERT, UPDATE ou DELETE em uma tabela específica. Útil para auditoria, validações complexas ou manter dados sincronizados.
 
-Desafio 1: Criar um TRIGGER que, ao atualizar a tabela film, registra o film_id e a hora na tabela film_audit_log (precisa criar ela primeiro).
+Desafio 1
+Criar um TRIGGER que, ao atualizar a tabela film, registre o film_id e a data/hora da modificação em uma tabela de auditoria.
 
-SQL
-
--- Primeiro, crie a tabela de log
-CREATE TABLE film_audit_log (
+Solução 1
+-- 1. Crie a tabela de log
+CREATE TABLE IF NOT EXISTS film_audit_log (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
-    film_id SMALLINT NOT NULL,
-    update_timestamp DATETIME NOT NULL
+    film_id SMALLINT UNSIGNED NOT NULL,
+    update_timestamp DATETIME NOT NULL,
+    FOREIGN KEY (film_id) REFERENCES film(film_id) ON DELETE CASCADE
 );
 
--- Agora, crie o TRIGGER
+-- 2. Crie o TRIGGER
 DELIMITER //
 
 CREATE TRIGGER after_film_update
@@ -435,19 +460,21 @@ END;
 
 DELIMITER ;
 
--- Teste: UPDATE film SET rental_duration = 4 WHERE film_id = 1;
--- Verifique: SELECT * FROM film_audit_log;
-Desafio 2: Criar um TRIGGER que, antes de inserir um aluguel, bloqueie se o filme tiver classificação 'NC-17' e mostre um erro.
+-- 3. Teste
+-- UPDATE film SET rental_duration = 4 WHERE film_id = 1;
+-- SELECT * FROM film_audit_log;
 
-SQL
+Desafio 2
+Criar um TRIGGER que, antes de inserir um novo aluguel, impeça a operação se o filme tiver a classificação 'NC-17', retornando uma mensagem de erro.
 
+Solução 2
 DELIMITER //
 
 CREATE TRIGGER before_rental_insert_check_rating
 BEFORE INSERT ON rental
 FOR EACH ROW
 BEGIN
-    DECLARE film_rating VARCHAR(10);
+    DECLARE film_rating ENUM('G','PG','PG-13','R','NC-17');
 
     SELECT f.rating INTO film_rating
     FROM inventory i
@@ -462,41 +489,36 @@ END;
 
 DELIMITER ;
 
--- Teste (substitua o inventory_id por um de filme NC-17 ou PG):
+-- Teste (exige um inventory_id de um filme NC-17)
 -- INSERT INTO rental (rental_date, inventory_id, customer_id, staff_id, last_update)
--- VALUES (NOW(), (SELECT inventory_id FROM inventory i JOIN film f ON i.film_id = f.film_id WHERE f.rating = 'NC-17' LIMIT 1), 1, 1, NOW());
-Item 15: Índices e Otimização (Indexes)
-Conceito: Índice é tipo o índice de um livro: te ajuda a achar a informação rapidão, sem ter que ler tudo. No banco, acelera as consultas em tabelas grandes. Sem índice, o banco lê linha por linha (lento!). Com índice, ele vai direto. Usa CREATE INDEX.
+-- VALUES (NOW(), (SELECT i.inventory_id FROM inventory i JOIN film f ON i.film_id = f.film_id WHERE f.rating = 'NC-17' LIMIT 1), 1, 1, NOW());
 
-Desafio 1: Otimizar busca por sobrenome em customer.
+15. Índices (Indexes) e Otimização
+Conceito: Um índice é uma estrutura de dados que melhora a velocidade das operações de busca em uma tabela. Em vez de percorrer a tabela inteira (full table scan), o banco de dados pode usar o índice para encontrar os registros rapidamente, como o índice de um livro.
 
-Consulta Lenta:
+Desafio 1
+Otimizar a busca de clientes por sobrenome (last_name).
 
-SQL
+Consulta a Otimizar
+-- Esta consulta pode ser lenta em tabelas grandes sem um índice
+SELECT * FROM customer WHERE last_name = 'SMITH';
 
-SELECT *
-FROM customer
-WHERE last_name = 'SMITH';
-Por que melhora? Sem índice, pra achar 'SMITH' ele lê a tabela inteira. Com o índice em last_name, ele vai direto pros 'SMITH', tipo um atalho. Ganho gigante em tabela grande.
-
-Criação do Índice:
-
-SQL
-
+Criação do Índice
+-- Criar um índice na coluna last_name acelera a busca
 CREATE INDEX idx_customer_last_name ON customer (last_name);
-Desafio 2: Otimizar busca em rental por customer_id E rental_date.
 
-Consulta a Otimizar:
+Por que melhora? Sem o índice, o banco de dados precisa ler cada linha da tabela customer para encontrar os 'SMITH'. Com o índice, ele vai diretamente para as localizações dos registros correspondentes, tornando a busca quase instantânea.
 
-SQL
+Desafio 2
+Otimizar uma busca que filtra aluguéis por customer_id e por um intervalo de rental_date.
 
+Consulta a Otimizar
 SELECT rental_id, inventory_id, return_date
 FROM rental
 WHERE customer_id = 100 AND rental_date BETWEEN '2005-05-01' AND '2005-06-30';
-Criação do Índice Composto:
 
-SQL
-
+Criação do Índice Composto
+-- Um índice em múltiplas colunas (composto) é ideal para esta query
 CREATE INDEX idx_rental_customer_date ON rental (customer_id, rental_date);
-Por que melhora? Pra buscar em duas colunas, um índice composto (customer_id, rental_date) é o ideal. Ele já organiza os dados pra encontrar o cliente e, dentro do cliente, as datas, tudo junto e rápido.
-```
+
+Por que melhora? Um índice composto em (customer_id, rental_date) permite que o banco filtre eficientemente primeiro pelo cliente e, em seguida, pelo intervalo de datas dentro dos registros daquele cliente, otimizando drasticamente a consulta.
